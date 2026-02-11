@@ -300,10 +300,20 @@ function CombatData:EncounterFinished(timestamp)
 	fileSelectDialog:NotifyLastItemChanged(self.currentEncounter.longName);
 	
 	-- record skill data for recommendations (using the encounter's own mob/restore data)
+	local encMob = self.currentEncounter.orderedMobs[1];
+	local encRestore = self.currentEncounter.orderedRestores[1];
 	if (skillRecommendations ~= nil) then
-		local encMob = self.currentEncounter.orderedMobs[1];
-		local encRestore = self.currentEncounter.orderedRestores[1];
 		skillRecommendations:RecordEncounter(encMob, encRestore, encMob.duration);
+	end
+	
+	-- show post-combat summary toast
+	if (combatSummary ~= nil) then
+		combatSummary:ShowSummary(encMob, encRestore, encMob.duration);
+	end
+	
+	-- accumulate session statistics
+	if (sessionStats ~= nil) then
+		sessionStats:RecordEncounter(encMob, encRestore, encMob.duration);
 	end
 	
 	-- now that we are out of combat, update the chatsend buttons

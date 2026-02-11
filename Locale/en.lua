@@ -438,6 +438,21 @@ L["Minimum"] = "Minimum";
 L["Recommendations"] = "Recommendations";
 L["RecNoData"] = "No data yet";
 
+L["CombatSummaryTopSkills"] = "Top Skills";
+L["CombatSummaryDPS"] = "DPS";
+L["CombatSummaryHPS"] = "HPS";
+L["CombatSummaryNewBest"] = "New Personal Best!";
+L["CombatSummaryPrev"] = "was";
+L["CombatSummaryBestDPS"] = "Best DPS";
+L["ShowCombatSummary"] = "Show Post-Combat Summary";
+L["ShowCombatSummaryTooltip"] = "Display a brief popup after each encounter showing your DPS, top skills, and personal best comparison.";
+
+L["Session"] = "Session";
+L["SessionCombatTime"] = "Combat Time";
+L["SessionAvgPS"] = "Average /s";
+L["SessionBestPS"] = "Best /s";
+L["SessionNoData"] = "No encounters yet";
+
 --- Added in v4.4.7 to support Normal Hits
 L["NormalHits"] = "Normal Hits";
 L["NormalHitChance"] = "Hit Chance";

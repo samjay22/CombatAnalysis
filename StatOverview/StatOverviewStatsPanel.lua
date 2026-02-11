@@ -302,6 +302,18 @@ function StatOverviewStatsPanel:Constructor(tab,mainTitle,psTitle,showAvoids,sho
 		table.insert(self.recNodes, node);
 	end
 	
+	-- Session statistics section (resets each login)
+	self.sessionNode = StatOverviewTreeNode(self,1,L.Session,true,overlayColor);
+	rootNode:Add(self.sessionNode);
+	local sessionChildren = self.sessionNode:GetChildNodes();
+	
+	self.sessionTimeNode = StatOverviewTreeNode(self,2,L.SessionCombatTime,false);
+	sessionChildren:Add(self.sessionTimeNode);
+	self.sessionAvgNode = StatOverviewTreeNode(self,2,L.SessionAvgPS,false);
+	sessionChildren:Add(self.sessionAvgNode);
+	self.sessionBestNode = StatOverviewTreeNode(self,2,L.SessionBestPS,false);
+	sessionChildren:Add(self.sessionBestNode);
+	
 	--- Added in v4.4.7 to support Normal Hits
   self.normalHitsNode = StatOverviewTreeNode(self,1,L.NormalHits,true,overlayColor);          
   rootNode:Add(self.normalHitsNode);                                                          
@@ -487,6 +499,7 @@ function StatOverviewStatsPanel:UpdateColor(color)
   
   self.mainNode:UpdateColor(self.color);
   self.recsNode:UpdateColor(self.color);
+  self.sessionNode:UpdateColor(self.color);
   
   --- Added in v4.4.7 to support Normal Hits
   self.normalHitsNode:UpdateColor(self.color);   
@@ -850,6 +863,22 @@ function StatOverviewStatsPanel:FullUpdate(duration,newSelection,forceNewSelecti
 		end
 	end
 	
+	-- Update session statistics
+	local sessionCategory = sessionStats.tabCategoryMap[self.tab.saveKey];
+	if (sessionCategory ~= nil) then
+		self.sessionNode.label:SetText(sessionStats:GetHeaderLabel(sessionCategory));
+		local ss = sessionStats:GetStats(sessionCategory);
+		if (ss ~= nil) then
+			self.sessionTimeNode:UpdateData(Misc.FormatDuration(ss.totalTime));
+			self.sessionAvgNode:UpdateData(Misc.FormatPs(ss.avgPs));
+			self.sessionBestNode:UpdateData(Misc.FormatPs(ss.bestPs), ss.bestPsName);
+		else
+			self.sessionTimeNode:UpdateData(L.SessionNoData);
+			self.sessionAvgNode:ClearData();
+			self.sessionBestNode:ClearData();
+		end
+	end
+	
 	--- Added in v4.4.7 to support Normal Hits
 	self.normalHitChanceNode:UpdateData(Misc.FormatValue(dataSummary.normals),Misc.FormatPerc(dataSummary:NormalChance(),true));         
 	self.normalHitAvgNode:UpdateData(Misc.FormatValue(dataSummary:NormalAverage()));                                                     
@@ -991,6 +1020,7 @@ function StatOverviewStatsPanel:GetState()
 	
 	state["totals"] = self.mainNode.expanded;
 	state["recommendations"] = self.recsNode.expanded;
+	state["session"] = self.sessionNode.expanded;
 	
 	--- Added in v4.4.7 to support Normal Hits
 	state["normals"] = self.normalHitsNode.expanded;
@@ -1021,6 +1051,7 @@ end
 function StatOverviewStatsPanel:Restore(savedState)
 	self.mainNode:SetExpanded(savedState["totals"]);
 	if (savedState["recommendations"] ~= nil) then self.recsNode:SetExpanded(savedState["recommendations"]) end
+	if (savedState["session"] ~= nil) then self.sessionNode:SetExpanded(savedState["session"]) end
 	
 	--- Added in v4.4.7 to support Normal Hits
 	self.normalHitsNode:SetExpanded(savedState["normals"]); 

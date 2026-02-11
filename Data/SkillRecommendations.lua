@@ -36,6 +36,10 @@ SkillRecommendations.confidenceThreshold = 3;
 -- trash-kill outliers inflating the numbers.
 SkillRecommendations.minEncounterDuration = 5;
 
+-- Bump this when the data format or filtering rules change so
+-- that stale data is automatically discarded on load.
+SkillRecommendations.dataVersion = 2;
+
 function SkillRecommendations:Constructor()
 	self.playerClass = (player ~= nil and player.class or "Unknown");
 	self.totalEncounters = 0;
@@ -53,6 +57,13 @@ function SkillRecommendations:Load()
 	local saved = Turbine.PluginData.Load(Turbine.DataScope.Character,"CombatAnalysisRecommendations");
 	if (type(saved) == "table") then
 		DecodeNumbers(saved);
+
+		-- Discard data from an older version (e.g. before the
+		-- min-encounter-duration filter was in place).
+		if (saved._dataVersion ~= SkillRecommendations.dataVersion) then
+			return;
+		end
+
 		for cat,skills in pairs(saved) do
 			if (self.data[cat] ~= nil and type(skills) == "table") then
 				self.data[cat] = skills;
@@ -75,6 +86,7 @@ local function buildSaveTable()
 	local t = Misc.TableCopy(skillRecommendations.data);
 	t._playerClass     = skillRecommendations.playerClass;
 	t._totalEncounters = skillRecommendations.totalEncounters;
+	t._dataVersion     = SkillRecommendations.dataVersion;
 	return EncodeNumbers(t);
 end
 

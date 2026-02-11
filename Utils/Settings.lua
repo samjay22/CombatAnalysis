@@ -182,6 +182,9 @@ local restoreV420Settings = function()
   settings.allMinized = false;
   settings.allHidden = false;
   
+  -- post-combat summary popup
+  settings.showCombatSummary = true;
+
   -- the first of potentially more tutorial hints
   settings.combatAnalysisLogoTutorialViewed = false;
  
@@ -349,6 +352,7 @@ local interpretSettings = function ()
   Misc.SetValue(nil,"windowsLocked",settings.windowsLocked,true);
   Misc.SetValue(nil,"windowsHidden",settings.windowsHidden,true);
   Misc.SetValue(nil,"largeFont",settings.largeFont, true);
+  Misc.SetValue(nil,"showCombatSummary",settings.showCombatSummary ~= false, true);
   
   if (not showCombatAnalysisIcon) then WindowManager.ShowHideWindows({combatAnalysisIcon},false,true,"combatAnalysisIcon") end
   if (windowsLocked) then combatAnalysisIcon:LockWindows(true,true) end

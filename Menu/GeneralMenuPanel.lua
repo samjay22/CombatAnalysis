@@ -180,10 +180,43 @@ function GeneralMenuPanel:Constructor(window)
 		end
 	end, self, self);
  
+	self.showCombatSummary = Turbine.UI.Lotro.CheckBox();
+	self.showCombatSummary:SetTop(self.largeFont:GetTop()+27);
+	self.showCombatSummary:SetMultiline(false);
+	self.showCombatSummary:SetCheckAlignment(Turbine.UI.ContentAlignment.MiddleLeft);
+	self.showCombatSummary:SetTextAlignment(Turbine.UI.ContentAlignment.MiddleLeft);
+	self.showCombatSummary:SetFont(Turbine.UI.Lotro.Font.TrajanPro14);
+	self.showCombatSummary:SetForeColor(control2LightColor);
+	self.showCombatSummary:SetText(" " .. L.ShowCombatSummary);
+	self.showCombatSummary:SetParent(self.content);
+	self.showCombatSummary:SetSize(self.width-20,20);
+	self.showCombatSummary:SetChecked(showCombatSummary == true);
+	TooltipManager.SetTooltip(self.showCombatSummary,L.ShowCombatSummaryTooltip,TooltipStyle.LOTRO,500);
+
+	self.showCombatSummary.MouseDown = function(sender,args)
+		WindowManager.MouseWasPressed(self.window);
+	end
+	self.showCombatSummary.MouseDoubleClick = function(sender,args)
+		self.showCombatSummary:SetChecked(not self.showCombatSummary:IsChecked());
+	end
+
+	self.showCombatSummary.CheckedChanged = function(sender,args)
+		if (showCombatSummary ~= self.showCombatSummary:IsChecked()) then
+			Misc.SetValue(nil,"showCombatSummary",self.showCombatSummary:IsChecked());
+			_G.settings.showCombatSummary = _G.showCombatSummary;
+			SaveSettings();
+		end
+	end
+	Misc.AddListener(nil, "showCombatSummary", function(sender)
+		if (sender.showCombatSummary:IsChecked() ~= showCombatSummary) then
+			sender.showCombatSummary:SetChecked(showCombatSummary);
+		end
+	end, self, self);
+
   self.maxEncountersSlider = Slider();
   self.maxEncountersSlider:SetParent(self.content);
   self.maxEncountersSlider:SetText(L.MaxStandardEncounters);
-  self.maxEncountersSlider:SetTop(self.largeFont:GetTop()+42); -- 125
+  self.maxEncountersSlider:SetTop(self.showCombatSummary:GetTop()+42);
   self.maxEncountersSlider:SetSize(400,40);
   self.maxEncountersSlider:SetFormat("%d");
   self.maxEncountersSlider:SetStep(1);
@@ -401,6 +434,7 @@ function GeneralMenuPanel:Layout()
   self.showCombatAnalysisIcon:SetLeft(math.max(0,(w-20-self.width)/2)+15);
   self.windowsLocked:SetLeft(math.max(0,(w-20-self.width)/2)+15);
   self.largeFont:SetLeft(math.max(0,(w-20-self.width)/2)+15);
+  self.showCombatSummary:SetLeft(math.max(0,(w-20-self.width)/2)+15);
   
   self.maxEncountersSlider:SetLeft(math.max(0,(w-20-self.width)/2)+10);
   self.maxLoadedEncountersSlider:SetLeft(math.max(0,(w-20-self.width)/2)+10);

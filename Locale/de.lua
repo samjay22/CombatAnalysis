@@ -438,6 +438,21 @@ L["Minimum"] = "Minimum";
 L["Recommendations"] = "Empfehlungen";
 L["RecNoData"] = "Noch keine Daten";
 
+L["CombatSummaryTopSkills"] = "Top-F\195\164higkeiten";
+L["CombatSummaryDPS"] = "DPS";
+L["CombatSummaryHPS"] = "HPS";
+L["CombatSummaryNewBest"] = "Neuer pers\195\182nlicher Rekord!";
+L["CombatSummaryPrev"] = "war";
+L["CombatSummaryBestDPS"] = "Bester DPS";
+L["ShowCombatSummary"] = "Kampfzusammenfassung anzeigen";
+L["ShowCombatSummaryTooltip"] = "Zeigt nach jedem Kampf eine kurze Zusammenfassung mit DPS, Top-F\195\164higkeiten und pers\195\182nlichem Rekord an.";
+
+L["Session"] = "Sitzung";
+L["SessionCombatTime"] = "Kampfzeit";
+L["SessionAvgPS"] = "Durchschnitt /s";
+L["SessionBestPS"] = "Bester /s";
+L["SessionNoData"] = "Noch keine K\195\164mpfe";
+
 --- Added in v4.4.7 to support Normal Hits
 L["NormalHits"] = "Normale Hits";
 L["NormalHitChance"] = "Treffer Prozentsatz";

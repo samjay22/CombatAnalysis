@@ -10,3 +10,4 @@ import "CombatAnalysis.Data.Encounter"
 
 import "CombatAnalysis.Data.CombatData"
 import "CombatAnalysis.Data.SkillRecommendations"
+import "CombatAnalysis.Data.SessionStats"

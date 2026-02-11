@@ -52,6 +52,7 @@ import "CombatAnalysis.UI.SuggestionsPopup"
 import "CombatAnalysis.UI.SuggestionsTextBox"
 
 import "CombatAnalysis.UI.NotificationIcon"
+import "CombatAnalysis.UI.CombatSummary"
 
 import "CombatAnalysis.UI.Tab"
 import "CombatAnalysis.UI.TabbedPane"
