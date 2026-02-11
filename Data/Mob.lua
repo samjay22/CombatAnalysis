@@ -23,6 +23,13 @@ function Mob:Constructor(gameStartTime,mobName)
 	self.mobName = mobName;
 	
 	self.players = {{MobSummaryData()}};
+	self._dataCache = {
+		all = {},
+		player = {
+			[true] = {},
+			[false] = {}
+		}
+	};
 	
 end
 
@@ -92,24 +99,66 @@ function Mob:ResetDebuffs()
 end
 
 function Mob:GetAllPlayerData(dataType)
-	local data = {}
-	for playerName,playerData in pairs(self.players) do
-		data[playerName] = playerData[1][dataType.."Data"];
+	local fieldName = dataType.."Data";
+	local cache = self._dataCache.all[fieldName];
+	if (cache == nil) then
+		cache = {};
+		self._dataCache.all[fieldName] = cache;
+	else
+		for key in pairs(cache) do
+			cache[key] = nil;
+		end
 	end
 	
-	return data;
+	for playerName,playerData in pairs(self.players) do
+		cache[playerName] = playerData[1][fieldName];
+	end
+	
+	return cache;
 end
 
 function Mob:GetPlayerData(player,dataType,includeTotals)
-	if (self.players[player] == nil) then return {} end
+	local fieldName = dataType.."Data";
+	local includeKey = (includeTotals == true);
+	local perIncludeCache = self._dataCache.player[includeKey];
+	local fieldCache = perIncludeCache[fieldName];
+	if (fieldCache == nil) then
+		fieldCache = {};
+		perIncludeCache[fieldName] = fieldCache;
+	end
 	
-	local data = {}
-	for skillName,playerData in pairs(self.players[player]) do
-		if (includeTotals or type(skillName) == "string") then
-			data[skillName] = playerData[dataType.."Data"];
+	if (player == nil) then
+		local emptyResult = fieldCache[fieldCache];
+		if (emptyResult == nil) then
+			emptyResult = {};
+			fieldCache[fieldCache] = emptyResult;
+		else
+			for key in pairs(emptyResult) do
+				emptyResult[key] = nil;
+			end
+		end
+		return emptyResult;
+	end
+	
+	local result = fieldCache[player];
+	if (result == nil) then
+		result = {};
+		fieldCache[player] = result;
+	else
+		for key in pairs(result) do
+			result[key] = nil;
 		end
 	end
-	return data;
+	
+	local playerInfo = self.players[player];
+	if (playerInfo == nil) then return result; end
+	
+	for skillName,playerData in pairs(playerInfo) do
+		if (includeTotals or type(skillName) == "string") then
+			result[skillName] = playerData[fieldName];
+		end
+	end
+	return result;
 end
 
 function Mob:GetState(timestamp,debuffDataOnly)

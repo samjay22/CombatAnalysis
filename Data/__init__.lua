@@ -9,3 +9,4 @@ import "CombatAnalysis.Data.Restore"
 import "CombatAnalysis.Data.Encounter"
 
 import "CombatAnalysis.Data.CombatData"
+import "CombatAnalysis.Data.SkillRecommendations"

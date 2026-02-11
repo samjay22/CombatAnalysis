@@ -5,11 +5,11 @@ _G.LabelledComboBox = class(Turbine.UI.Control);
 -- configurable properties
 LabelledComboBox.height = 25;
 
-LabelledComboBox.HighlightColor = Turbine.UI.Color(232/255, 175/255, 72/255);
-LabelledComboBox.SelectionColor = Turbine.UI.Color(203/255, 195/255, 52/255);
-LabelledComboBox.ItemColor = Turbine.UI.Color(245/255, 222/255, 147/255);
-LabelledComboBox.DisabledColor = Turbine.UI.Color(162/255, 162/255, 162/255);
-LabelledComboBox.BlackColor = Turbine.UI.Color(1, 0, 0, 0);
+LabelledComboBox.HighlightColor = Theme.Colors.accentHover;
+LabelledComboBox.SelectionColor = Theme.Colors.accentActive;
+LabelledComboBox.ItemColor = Theme.Colors.textPrimary;
+LabelledComboBox.DisabledColor = Theme.Colors.textMuted;
+LabelledComboBox.BlackColor = Theme.Colors.surfaceMuted;
 
 LabelledComboBox.TextOnLeft = 1;
 LabelledComboBox.TextOnRight = 2;
@@ -23,10 +23,10 @@ function LabelledComboBox:Constructor(window,text,width,textOrientation,textAlig
     self.width = (width or 160);
     self.boxWidth = (boxWidth or 160);
     self.itemHeight = (itemHeight or 20);
-    self.font = (fontSize == "13" and Turbine.UI.Lotro.Font.TrajanPro13 or Turbine.UI.Lotro.Font.TrajanPro14);
+    self.font = (fontSize == "13" and Theme.Fonts.small or Theme.Fonts.body);
     
     self.dropDownBorderSize = (dropDownBorderSize or 2);
-    self.dropDownColor = (dropDownColor or LabelledComboBox.DisabledColor);
+    self.dropDownColor = (dropDownColor or Theme.Colors.borderSoft);
     
     self:SetSize(width,self.itemHeight);
     
@@ -50,7 +50,9 @@ function LabelledComboBox:Constructor(window,text,width,textOrientation,textAlig
       self.text:SetSize(width - 170, 16);
       self.text:SetText(text);
       self.text:SetFont(self.font);
-      self.text:SetForeColor(control2LightColor);
+      self.text:SetForeColor(Theme.Colors.textSecondary);
+      self.text:SetFontStyle(Turbine.UI.FontStyle.None);
+      self.text:SetOutlineColor(Theme.Colors.controlOutline);
       self.text:SetTextAlignment(textAlignment or Turbine.UI.ContentAlignment.MiddleCenter);
       self.text:SetMultiline(false);
       self.text.MouseDown = function(sender,args)
@@ -62,6 +64,7 @@ function LabelledComboBox:Constructor(window,text,width,textOrientation,textAlig
     self.dropDownBox:SetParent(self);
     self.dropDownBox:SetSize((self.text and self.boxWidth or self.width),self.itemHeight);
     self.dropDownBox:SetBackColor(self.dropDownColor);
+    self.dropDownBox:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
     
     -- label background
     self.labelBackground = Turbine.UI.Control();
@@ -69,6 +72,7 @@ function LabelledComboBox:Constructor(window,text,width,textOrientation,textAlig
     self.labelBackground:SetPosition(self.dropDownBorderSize,self.dropDownBorderSize);
     self.labelBackground:SetSize((self.text and self.boxWidth or self.width) - 2*self.dropDownBorderSize,self.itemHeight - 2*self.dropDownBorderSize);
     self.labelBackground:SetBackColor(LabelledComboBox.BlackColor);
+    self.labelBackground:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
     self.labelBackground:SetMouseVisible(false);
     
     -- drop down label
@@ -79,7 +83,9 @@ function LabelledComboBox:Constructor(window,text,width,textOrientation,textAlig
     self.label:SetFont(self.font);
     self.label:SetForeColor(LabelledComboBox.ItemColor);
     self.label:SetBackColor(LabelledComboBox.BlackColor);
-    self.label:SetOutlineColor(LabelledComboBox.HighlightColor);
+    self.label:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
+    self.label:SetOutlineColor(Theme.Colors.controlOutline);
+    self.label:SetFontStyle(Turbine.UI.FontStyle.None);
     self.label:SetTextAlignment(self.alignment);
     self.label:SetMultiline(false);
     self.label:SetMouseVisible(false);
@@ -97,6 +103,7 @@ function LabelledComboBox:Constructor(window,text,width,textOrientation,textAlig
     -- drop down window
     self.dropDownWindow = Turbine.UI.Window();
     self.dropDownWindow:SetBackColor(self.dropDownColor);
+    self.dropDownWindow:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
     self.dropDownWindow:SetZOrder(8);
     self.dropDownWindow:SetVisible(false);
     self.dropDownWindow.Deactivated = function(sender, args)
@@ -110,6 +117,7 @@ function LabelledComboBox:Constructor(window,text,width,textOrientation,textAlig
     self.scrollBar:SetOrientation(Turbine.UI.Orientation.Vertical);
     self.scrollBar:SetParent(self.dropDownWindow);
     self.scrollBar:SetBackColor(LabelledComboBox.BlackColor);
+    self.scrollBar:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
 
     -- list to contain the drop down items
     self.listBox = Turbine.UI.ListBox();
@@ -120,6 +128,7 @@ function LabelledComboBox:Constructor(window,text,width,textOrientation,textAlig
     self.listBox:SetMouseVisible(false);
     self.listBox:SetPosition(2, 2);
     self.listBox:SetBackColor(LabelledComboBox.BlackColor);
+    self.listBox:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
     
     -- mouse events
     
@@ -128,7 +137,6 @@ function LabelledComboBox:Constructor(window,text,width,textOrientation,textAlig
       
       if (not self:IsEnabled()) then return end
       
-      self.label:SetFontStyle(Turbine.UI.FontStyle.Outline);
       self.label:SetForeColor(self.labelColor);
       self.label:SetText(self.label:GetText());
 
@@ -140,7 +148,6 @@ function LabelledComboBox:Constructor(window,text,width,textOrientation,textAlig
       
       if (not self:IsEnabled()) then return end
       
-      self.label:SetFontStyle(Turbine.UI.FontStyle.None);
       if (self.open) then self.label:SetForeColor(self.labelSelectedColor) end
       self.label:SetText(self.label:GetText());
       
@@ -221,18 +228,15 @@ function LabelledComboBox:AddItem(text, value, position)
     listItem.label:SetTextAlignment(self.alignment);
     listItem.label:SetForeColor(LabelledComboBox.ItemColor);
     listItem.label:SetFont(self.font);
-    listItem.label:SetOutlineColor(LabelledComboBox.HighlightColor);
+    listItem.label:SetOutlineColor(Theme.Colors.controlOutline);
     listItem.label:SetText(text);
     listItem.label:SetMultiline(false);
     listItem.label:SetMouseVisible(false);
     
     listItem.MouseEnter = function(sender, args)
-        sender.label:SetFontStyle(Turbine.UI.FontStyle.Outline);
-        sender.label:SetForeColor(LabelledComboBox.ItemColor);
-        sender.label:SetText(sender.label:GetText());
+      sender.label:SetForeColor(LabelledComboBox.ItemColor);
     end
     listItem.MouseLeave = function(sender, args)
-        sender.label:SetFontStyle(Turbine.UI.FontStyle.None);
         if (self.listBox:IndexOfItem(sender) == self.selection) then
             sender.label:SetForeColor(LabelledComboBox.SelectionColor);
         end

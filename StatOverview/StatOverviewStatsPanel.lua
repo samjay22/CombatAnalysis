@@ -290,6 +290,18 @@ function StatOverviewStatsPanel:Constructor(tab,mainTitle,psTitle,showAvoids,sho
 	self.minNode = StatOverviewTreeNode(self,2,L.Minimum,false);
 	dmgChildren:Add(self.minNode);
 	
+	-- Recommendations section (learns from lifetime skill data)
+	self.recsNode = StatOverviewTreeNode(self,1,L.Recommendations,true,overlayColor);
+	rootNode:Add(self.recsNode);
+	local recsChildren = self.recsNode:GetChildNodes();
+	
+	self.recNodes = {};
+	for i = 1, skillRecommendations.maxRecommendations do
+		local node = StatOverviewTreeNode(self,2,L.RecNoData,false);
+		recsChildren:Add(node);
+		table.insert(self.recNodes, node);
+	end
+	
 	--- Added in v4.4.7 to support Normal Hits
   self.normalHitsNode = StatOverviewTreeNode(self,1,L.NormalHits,true,overlayColor);          
   rootNode:Add(self.normalHitsNode);                                                          
@@ -474,6 +486,7 @@ function StatOverviewStatsPanel:UpdateColor(color)
   self.color = Turbine.UI.Color(math.min(0.51,color.A*1.25),color.R*0.5,color.G*0.5,color.B*0.5);
   
   self.mainNode:UpdateColor(self.color);
+  self.recsNode:UpdateColor(self.color);
   
   --- Added in v4.4.7 to support Normal Hits
   self.normalHitsNode:UpdateColor(self.color);   
@@ -812,6 +825,22 @@ function StatOverviewStatsPanel:FullUpdate(duration,newSelection,forceNewSelecti
 	self.maxNode:UpdateData(Misc.FormatValue(dataSummary.max));
 	self.minNode:UpdateData(Misc.FormatValue(dataSummary.min));
 	
+	-- Update recommendations from lifetime data
+	local recCategory = skillRecommendations.tabCategoryMap[self.tab.saveKey];
+	if (recCategory ~= nil) then
+		local topSkills = skillRecommendations:GetTopSkills(recCategory);
+		for i = 1, skillRecommendations.maxRecommendations do
+			if (topSkills[i] ~= nil) then
+				local sk = topSkills[i];
+				self.recNodes[i].label:SetText(sk.name);
+				self.recNodes[i]:UpdateData(Misc.FormatValue(sk.avgPerHit), Misc.FormatPerc(sk.critRate,true));
+			else
+				self.recNodes[i].label:SetText(L.RecNoData);
+				self.recNodes[i]:ClearData();
+			end
+		end
+	end
+	
 	--- Added in v4.4.7 to support Normal Hits
 	self.normalHitChanceNode:UpdateData(Misc.FormatValue(dataSummary.normals),Misc.FormatPerc(dataSummary:NormalChance(),true));         
 	self.normalHitAvgNode:UpdateData(Misc.FormatValue(dataSummary:NormalAverage()));                                                     
@@ -932,6 +961,7 @@ function StatOverviewStatsPanel:GetState()
 	local state = {}
 	
 	state["totals"] = self.mainNode.expanded;
+	state["recommendations"] = self.recsNode.expanded;
 	
 	--- Added in v4.4.7 to support Normal Hits
 	state["normals"] = self.normalHitsNode.expanded;
@@ -961,6 +991,7 @@ end
 -- Restore state method (NB: not static like the other restore state methods)
 function StatOverviewStatsPanel:Restore(savedState)
 	self.mainNode:SetExpanded(savedState["totals"]);
+	if (savedState["recommendations"] ~= nil) then self.recsNode:SetExpanded(savedState["recommendations"]) end
 	
 	--- Added in v4.4.7 to support Normal Hits
 	self.normalHitsNode:SetExpanded(savedState["normals"]); 

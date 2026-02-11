@@ -26,7 +26,8 @@ function TabbedPane:Constructor(window,parent)
 	self.border:SetPosition(1,23);
 	self.border:SetZOrder(-1);
 	self.border:SetMouseVisible(false);
-	self.border:SetBackColor(blueBorderColor);
+  self.border:SetBackColor(Theme.Colors.borderSoft);
+  self.border:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
 end
 
 function TabbedPane:AddTab(tabName,content)

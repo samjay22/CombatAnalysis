@@ -25,36 +25,26 @@ function CombatAnalysisTab:Constructor(tabSet,text,menu,panel)
 	self.selected = false;
 	self.dragging = false;
 	self.prevHover = nil;
+	self.hovered = false;
+	self.tintColor = Theme.Colors.accent;
 	
 	self.tabSet = tabSet;
 	self.text = text;
 	self.panel = panel;
 	
-	-- west edge of tab
-	self.w = Turbine.UI.Control();
-	self.w:SetParent(self);
-	self.w:SetSize(13,28);
-	self.w:SetMouseVisible(false);
-	self.w:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_back_w.tga");
-	self.w:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	
-	-- north (center) of tab
-	self.n = Turbine.UI.Control();
-	self.n:SetParent(self);
-	self.n:SetSize(CombatAnalysisTabbedWindow.tabWidth-26,28);
-	self.n:SetPosition(13,0);
-	self.n:SetMouseVisible(false);
-	self.n:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_back_n.tga");
-	self.n:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	
-	-- east edge of tab
-	self.e = Turbine.UI.Control();
-	self.e:SetParent(self);
-	self.e:SetSize(13,28);
-	self.e:SetPosition(CombatAnalysisTabbedWindow.tabWidth-13,0);
-	self.e:SetMouseVisible(false);
-	self.e:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_back_e.tga");
-	self.e:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
+	self.background = Turbine.UI.Control();
+	self.background:SetParent(self);
+	self.background:SetSize(CombatAnalysisTabbedWindow.tabWidth,28);
+	self.background:SetMouseVisible(false);
+  Theme.ApplyInsetSurface(self.background);
+
+	self.highlight = Turbine.UI.Control();
+	self.highlight:SetParent(self);
+	self.highlight:SetSize(CombatAnalysisTabbedWindow.tabWidth,3);
+	self.highlight:SetPosition(0,25);
+	self.highlight:SetMouseVisible(false);
+	self.highlight:SetBackColor(Theme.Colors.accent);
+	self.highlight:SetVisible(false);
 	
 	-- tab label
 	self.label = Turbine.UI.Label();
@@ -62,9 +52,9 @@ function CombatAnalysisTab:Constructor(tabSet,text,menu,panel)
 	self.label:SetZOrder(1);
 	self.label:SetSize(CombatAnalysisTabbedWindow.tabWidth,28);
 	self.label:SetMouseVisible(false);
-	self.label:SetFont(Turbine.UI.Lotro.Font.TrajanPro16);
+	self.label:SetFont(Theme.Fonts.heading);
 	self.label:SetForeColor(controlColor);
-	self.label:SetFontStyle(Turbine.UI.FontStyle.Outline);
+	self.label:SetFontStyle(Turbine.UI.FontStyle.None);
 	self.label:SetTextAlignment(Turbine.UI.ContentAlignment.MiddleCenter);
 	self.label:SetText(string.lower(self.text));
 	
@@ -74,13 +64,31 @@ function CombatAnalysisTab:Constructor(tabSet,text,menu,panel)
 	self.colorOverlay:SetSize(CombatAnalysisTabbedWindow.tabWidth,26);
 	self.colorOverlay:SetMouseVisible(false);
 	self.colorOverlay:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
+	self.colorOverlay:SetVisible(false);
+
+	self.SizeChanged = function()
+		local w,h = self:GetSize();
+		self.background:SetSize(w,h);
+		self.highlight:SetSize(w,3);
+		self.highlight:SetTop(math.max(0,h-3));
+		self.colorOverlay:SetSize(w,math.max(0,h-2));
+	end
+	self:SizeChanged();
 	
 	-- drag window, used when dragging the tab
 	self.dragWindow = Turbine.UI.Window();
 	self.dragWindow:SetZOrder(1);
 	self.dragWindow:SetSize(204,28);
 	self.dragWindow:SetMouseVisible(false);
-	self.dragWindow:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_front_w.tga");
+  Theme.ApplyRaisedSurface(self.dragWindow);
+
+  self.dragWindowHighlight = Turbine.UI.Control();
+  self.dragWindowHighlight:SetParent(self.dragWindow);
+  self.dragWindowHighlight:SetSize(204,3);
+  self.dragWindowHighlight:SetPosition(0,25);
+  self.dragWindowHighlight:SetMouseVisible(false);
+  self.dragWindowHighlight:SetBackColor(Theme.Colors.accent);
+	self.dragWindowHighlight:SetVisible(true);
 	
 	-- drag window label
 	local label = Turbine.UI.Label();
@@ -88,9 +96,9 @@ function CombatAnalysisTab:Constructor(tabSet,text,menu,panel)
 	label:SetZOrder(1);
 	label:SetSize(204,28);
 	label:SetMouseVisible(false);
-	label:SetFont(Turbine.UI.Lotro.Font.TrajanPro16);
-	label:SetForeColor(controlSelectedColor);
-	label:SetFontStyle(Turbine.UI.FontStyle.Outline);
+	label:SetFont(Theme.Fonts.heading);
+	label:SetForeColor(Theme.Colors.textPrimary);
+	label:SetFontStyle(Turbine.UI.FontStyle.None);
 	label:SetTextAlignment(Turbine.UI.ContentAlignment.MiddleCenter);
 	label:SetText(text);
 	
@@ -102,6 +110,7 @@ function CombatAnalysisTab:Constructor(tabSet,text,menu,panel)
 	self.dragWindowOverlay:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
   
 	-- tab menu
+	self:UpdateVisualState();
 	self.tabMenu = menu;
 end
 
@@ -114,8 +123,14 @@ end
 function CombatAnalysisTab:UpdateColor(color)
   Misc.SetValue(self,"color",color);
   
-  self.colorOverlay:SetBackColor(Turbine.UI.Color(math.min(0.6,color.A),color.R,color.G,color.B));
-  self.dragWindowOverlay:SetBackColor(color);
+	self.colorOverlay:SetBackColor(Turbine.UI.Color(math.min(0.6,color.A),color.R,color.G,color.B));
+	self.dragWindowOverlay:SetBackColor(color);
+	self.tintColor = Turbine.UI.Color(math.max(color.A,0.85),color.R,color.G,color.B);
+	self.highlight:SetBackColor(self.tintColor);
+	if (self.dragWindowHighlight ~= nil) then
+		self.dragWindowHighlight:SetBackColor(self.tintColor);
+	end
+	self:UpdateVisualState();
 end
 
 -- Mouse Events
@@ -345,35 +360,45 @@ end
 function CombatAnalysisTab:SetHover(hover)
 	if (self.selected) then return end
 
-	if (hover) then
-		self.w:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_front_w.tga");
-		self.n:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_front_n.tga");
-		self.e:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_front_e.tga");
-		self.label:SetForeColor(controlSelectedColor);
-	else
-		self.w:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_back_w.tga");
-		self.n:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_back_n.tga");
-		self.e:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_back_e.tga");
-		self.label:SetForeColor(controlColor);
-	end
+	self.hovered = hover;
+	self:UpdateVisualState();
 end
 
 function CombatAnalysisTab:SetSelected(selected)
-	if (selected) then
-		self.w:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_front_w.tga");
-		self.n:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_front_n.tga");
-		self.e:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_front_e.tga");
-		self.label:SetText(self.text);
-		self.label:SetForeColor(controlSelectedColor);
-	else
-		self.w:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_back_w.tga");
-		self.n:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_back_n.tga");
-		self.e:SetBackground("CombatAnalysis/Resources/chat_tab_tier1_middle_back_e.tga");
-		self.label:SetText(string.lower(self.text));
-		self.label:SetForeColor(controlColor);
-	end
-	
 	self.selected = selected;
+	if (not selected) then
+		self.hovered = false;
+	end
+	self:UpdateVisualState();
+end
+
+function CombatAnalysisTab:UpdateVisualState()
+	local accent = self.tintColor or Theme.Colors.accent;
+	if (self.selected) then
+    Theme.ApplyRaisedSurface(self.background);
+    self.highlight:SetVisible(true);
+    self.highlight:SetBackColor(accent);
+    self.label:SetText(self.text);
+    self.label:SetForeColor(Theme.Colors.textPrimary);
+	elseif (self.hovered) then
+    Theme.ApplySurfaceBackground(self.background);
+    self.highlight:SetVisible(true);
+    self.highlight:SetBackColor(accent);
+    self.label:SetText(string.lower(self.text));
+    self.label:SetForeColor(Theme.Colors.accentHover);
+	else
+    Theme.ApplyInsetSurface(self.background);
+    self.highlight:SetVisible(false);
+    self.label:SetText(string.lower(self.text));
+    self.label:SetForeColor(controlColor);
+	end
+
+	if (self.dragWindow ~= nil) then
+    Theme.ApplyRaisedSurface(self.dragWindow);
+    if (self.dragWindowHighlight ~= nil) then
+      self.dragWindowHighlight:SetBackColor(accent);
+    end
+	end
 end
 
 

@@ -14,8 +14,9 @@ function Tab:Constructor(tabbedPane,tabIndex,tabName,content)
 	self.tabIndex = tabIndex;
 	self.tabbedPane = tabbedPane;
 	self.content = content;
-  
-  self.color = "";
+  self.accentColor = Theme.Colors.accent;
+	self.hovered = false;
+	self.pressed = false;
 	
 	if (self.enabled) then
 		self.content:SetPosition(2,24);
@@ -26,55 +27,60 @@ function Tab:Constructor(tabbedPane,tabIndex,tabName,content)
 	self:SetPosition((tabIndex-1)*95,2);	
 	self:SetSize(95,21);
 	self:SetZOrder(-2);
-	
-	-- tab left
-	self.left = Turbine.UI.Control();
-	self.left:SetParent(self);
-	self.left:SetSize(77,21);
-	self.left:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	self.left:SetMouseVisible(false);
-	self.left:SetBackground("CombatAnalysis/Resources/tab_tier1_middle_back_w"..self.color..".tga");
-	
-	-- tab right
-	self.right = Turbine.UI.Control();
-	self.right:SetParent(self);
-	self.right:SetPosition(77,0);
-	self.right:SetSize(18,21);
-	self.right:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	self.right:SetMouseVisible(false);
-	self.right:SetBackground("CombatAnalysis/Resources/tab_tier1_middle_back_e"..self.color..".tga");
+
+	self.background = Turbine.UI.Control();
+	self.background:SetParent(self);
+	self.background:SetMouseVisible(false);
+	self.background:SetZOrder(-1);
+  Theme.ApplyInsetSurface(self.background);
+
+	self.highlight = Turbine.UI.Control();
+	self.highlight:SetParent(self);
+	self.highlight:SetMouseVisible(false);
+	self.highlight:SetZOrder(0);
+	self.highlight:SetBackColor(self.accentColor);
+	self.highlight:SetVisible(false);
 	
 	-- tab text
 	self.text = Turbine.UI.Label();
 	self.text:SetParent(self);
 	self.text:SetText(tabName);
-  self.text:SetTop(1);
-	self.text:SetSize(95,20);
-	self.text:SetFont(Turbine.UI.Lotro.Font.TrajanPro15);
+	self.text:SetSize(95,21);
+	self.text:SetFont(Theme.Fonts.body);
 	self.text:SetForeColor(self.enabled and controlColor or controlDisabledColor);
-	self.text:SetFontStyle(Turbine.UI.FontStyle.Outline);
-	self.text:SetOutlineColor(Turbine.UI.Color(0,0,0));
+	self.text:SetFontStyle(Turbine.UI.FontStyle.None);
 	self.text:SetTextAlignment(Turbine.UI.ContentAlignment.MiddleCenter);
 	self.text:SetMouseVisible(false);	
+
+	self.SizeChanged = function()
+		local w,h = self:GetSize();
+		self.background:SetSize(w,h);
+		self.highlight:SetSize(w,2);
+		self.highlight:SetTop(h-2);
+		self.text:SetSize(w,h);
+	end
+
+	self:SizeChanged();
+	self:UpdateVisualState();
 end
 
 function Tab:SetColor(color)
-  self.color = ((color == "Red" or color == "Yellow") and ("_"..color:lower()) or "");
-  
-  self.left:SetBackground("CombatAnalysis/Resources/tab_tier1_middle_" .. (self.selected and "front" or "back") .. "_w"..self.color..".tga");
-	self.right:SetBackground("CombatAnalysis/Resources/tab_tier1_middle_" .. (self.selected and "front" or "back") .. "_e"..self.color..".tga");
+  if (color == "Red") then
+    self.accentColor = Theme.Colors.accentActive;
+  elseif (color == "Yellow") then
+    self.accentColor = Theme.Colors.accentHover;
+  else
+    self.accentColor = Theme.Colors.accent;
+  end
+  self.highlight:SetBackColor(self.accentColor);
+  self:UpdateVisualState();
 end
 
 function Tab:SetSelected(selected)
 	if (self.selected == selected) then return end
   
 	self.selected = selected;
-	
-	self.text:SetForeColor(self.selected and (self.pressed and controlSelectedColor or Turbine.UI.Color(1,1,1)) or controlColor);
-	self.text:SetFont(self.selected and Turbine.UI.Lotro.Font.TrajanPro16 or Turbine.UI.Lotro.Font.TrajanPro15);
-	self.text:SetText(self.text:GetText());
-	self.left:SetBackground("CombatAnalysis/Resources/tab_tier1_middle_" .. (self.selected and "front" or "back") .. "_w"..self.color..".tga");
-	self.right:SetBackground("CombatAnalysis/Resources/tab_tier1_middle_" .. (self.selected and "front" or "back") .. "_e"..self.color..".tga");
+	self:UpdateVisualState();
 	self.content:SetParent(self.selected and self.tabbedPane or nil);
   
   if (self.content.ContentSelected ~= nil) then
@@ -89,17 +95,16 @@ end
 -- tab highlight events
 function Tab:MouseEnter(args)
 	if (self.enabled) then
-		self.text:SetForeColor(self.selected and controlSelectedColor or control2Color);
-		self.left:SetBackground("CombatAnalysis/Resources/tab_tier1_middle_"..((self.pressed and self.selected) and "back" or "front").."_w"..self.color..".tga");
-		self.right:SetBackground("CombatAnalysis/Resources/tab_tier1_middle_"..((self.pressed and self.selected) and "back" or "front").."_e"..self.color..".tga");
+		self.hovered = true;
+		self:UpdateVisualState();
 	end
 end
 
 function Tab:MouseLeave(args)
 	if (self.enabled) then
-		self.text:SetForeColor(self.pressed and (self.selected and controlSelectedColor or control2Color) or (self.selected and Turbine.UI.Color(1,1,1) or controlColor));
-		self.left:SetBackground("CombatAnalysis/Resources/tab_tier1_middle_"..((self.pressed or self.selected) and "front" or "back").."_w"..self.color..".tga");
-		self.right:SetBackground("CombatAnalysis/Resources/tab_tier1_middle_"..((self.pressed or self.selected) and "front" or "back").."_e"..self.color..".tga");
+		self.hovered = false;
+		self.pressed = false;
+		self:UpdateVisualState();
 	end
 end
 
@@ -108,23 +113,49 @@ function Tab:MouseDown(args)
 	
 	if (self.enabled) then
 		self.pressed = true;
-		self.text:SetForeColor(self.selected and controlSelectedColor or Turbine.UI.Color(1,1,1));
-		self.left:SetBackground("CombatAnalysis/Resources/tab_tier1_middle_"..(self.selected and "front" or "back").."_w"..self.color..".tga");
-		self.right:SetBackground("CombatAnalysis/Resources/tab_tier1_middle_"..(self.selected and "front" or "back").."_e"..self.color..".tga");
+		self:UpdateVisualState();
 	end
 end
 
 function Tab:MouseUp(args)
 	if (self.enabled) then
 		self.pressed = false;
-		self.text:SetForeColor(self.selected and Turbine.UI.Color(1,1,1) or controlColor);
-		self.left:SetBackground("CombatAnalysis/Resources/tab_tier1_middle_"..(self.selected and "front" or "back").."_w"..self.color..".tga");
-		self.right:SetBackground("CombatAnalysis/Resources/tab_tier1_middle_"..(self.selected and "front" or "back").."_e"..self.color..".tga");
+		self:UpdateVisualState();
 	end
 end
 
 function Tab:MouseClick(args)
 	if (self.enabled) then
 		self.tabbedPane:SelectTab(self.tabIndex);
+	end
+end
+
+function Tab:UpdateVisualState()
+	if (not self.enabled) then
+		Theme.ApplyInsetSurface(self.background);
+		self.highlight:SetVisible(false);
+		self.text:SetForeColor(controlDisabledColor);
+		return;
+	end
+
+	if (self.selected) then
+		Theme.ApplyRaisedSurface(self.background);
+		self.highlight:SetVisible(true);
+		self.highlight:SetBackColor(self.accentColor);
+		self.text:SetForeColor(self.pressed and Theme.Colors.accentActive or Theme.Colors.textPrimary);
+	elseif (self.hovered) then
+		Theme.ApplySurfaceBackground(self.background);
+		self.highlight:SetVisible(true);
+		self.highlight:SetBackColor(Theme.Colors.accentMuted);
+		self.text:SetForeColor(Theme.Colors.accentHover);
+	else
+		Theme.ApplyInsetSurface(self.background);
+		self.highlight:SetVisible(self.pressed);
+		self.highlight:SetBackColor(self.accentColor);
+		self.text:SetForeColor(controlColor);
+	end
+
+	if (self.pressed and self.selected) then
+		self.highlight:SetBackColor(self.accentColor);
 	end
 end

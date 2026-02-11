@@ -4,7 +4,8 @@
 _G.Window = class(Turbine.UI.Window);
 
 -- colors
-Window.TitleColor = Turbine.UI.Color(245/255, 222/255, 147/255);
+Window.TitleColor = Theme.Colors.textPrimary;
+Window.TitleAccentColor = Theme.Colors.accent;
 
 function Window:Constructor(dialog)
 	Turbine.UI.Window.Constructor(self);
@@ -35,15 +36,22 @@ function Window:Constructor(dialog)
 	self.title = Turbine.UI.Label();
 	self.title:SetParent(self);
 	self.title:SetPosition(0,0);
-	self.title:SetSize(0,20);
+	self.title:SetSize(0,26);
 	self.title:SetZOrder(5);
-	self.title:SetOutlineColor(Turbine.UI.Color(1,0,0,0));
-	self.title:SetFontStyle(Turbine.UI.FontStyle.Outline);
-	self.title:SetFont(Turbine.UI.Lotro.Font.TrajanPro18);
+	self.title:SetFont(Theme.Fonts.title);
+	self.title:SetFontStyle(Turbine.UI.FontStyle.None);
 	self.title:SetForeColor(Window.TitleColor);
-	self.title:SetTextAlignment(Turbine.UI.ContentAlignment.MiddleCenter);
+	self.title:SetTextAlignment(Turbine.UI.ContentAlignment.MiddleLeft);
 	self.title:SetMouseVisible(false);
   self.title:SetVisible(false);
+
+  self.titleUnderline = Turbine.UI.Control();
+  self.titleUnderline:SetParent(self);
+  self.titleUnderline:SetSize(0,2);
+  self.titleUnderline:SetZOrder(4);
+  self.titleUnderline:SetBackColor(Window.TitleAccentColor);
+  self.titleUnderline:SetMouseVisible(false);
+  self.titleUnderline:SetVisible(false);
 
 	-- top left corner
 	self.topLeft = Turbine.UI.Control();
@@ -51,8 +59,8 @@ function Window:Constructor(dialog)
 	self.topLeft:SetSize(36,36);
 	self.topLeft:SetZOrder(-1);
 	self.topLeft:SetMouseVisible(false);
-	self.topLeft:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	self.topLeft:SetBackground("CombatAnalysis/Resources/box_silver_upper_left.tga");
+	self.topLeft:SetBackColor(Theme.Colors.border);
+	self.topLeft:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
 
 	-- topRight
 	self.topRight = Turbine.UI.Control();
@@ -60,8 +68,8 @@ function Window:Constructor(dialog)
 	self.topRight:SetSize(36,36);
 	self.topRight:SetZOrder(-1);
 	self.topRight:SetMouseVisible(false);
-	self.topRight:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	self.topRight:SetBackground("CombatAnalysis/Resources/box_silver_upper_right.tga");
+	self.topRight:SetBackColor(Theme.Colors.border);
+	self.topRight:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
 	
 	-- bottomLeft
 	self.bottomLeft = Turbine.UI.Control();
@@ -69,8 +77,8 @@ function Window:Constructor(dialog)
 	self.bottomLeft:SetSize(36,36);
 	self.bottomLeft:SetZOrder(-1);
 	self.bottomLeft:SetMouseVisible(false);
-	self.bottomLeft:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	self.bottomLeft:SetBackground("CombatAnalysis/Resources/box_silver_bottom_left.tga");
+	self.bottomLeft:SetBackColor(Theme.Colors.border);
+	self.bottomLeft:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
 
 	-- bottomRight
 	self.bottomRight = Turbine.UI.Control();
@@ -78,8 +86,8 @@ function Window:Constructor(dialog)
 	self.bottomRight:SetSize(36,36);
 	self.bottomRight:SetZOrder(-1);
 	self.bottomRight:SetMouseVisible(false);
-	self.bottomRight:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	self.bottomRight:SetBackground("CombatAnalysis/Resources/box_silver_lower_right.tga");
+	self.bottomRight:SetBackColor(Theme.Colors.border);
+	self.bottomRight:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
 
 	-- top side
 	self.top = Turbine.UI.Control();
@@ -87,8 +95,8 @@ function Window:Constructor(dialog)
 	self.top:SetSize(36,36);
 	self.top:SetZOrder(-1);
 	self.top:SetMouseVisible(false);
-	self.top:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	self.top:SetBackground("CombatAnalysis/Resources/box_silver_upper.tga");
+	self.top:SetBackColor(Theme.Colors.border);
+	self.top:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
 
 	-- left side
 	self.left = Turbine.UI.Control();
@@ -96,8 +104,8 @@ function Window:Constructor(dialog)
 	self.left:SetSize(36,36);
 	self.left:SetZOrder(-1);
 	self.left:SetMouseVisible(false);
-	self.left:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	self.left:SetBackground("CombatAnalysis/Resources/box_silver_side_left.tga");
+	self.left:SetBackColor(Theme.Colors.border);
+	self.left:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
 
 	-- right side
 	self.right = Turbine.UI.Control();
@@ -105,8 +113,8 @@ function Window:Constructor(dialog)
 	self.right:SetSize(36,36);
 	self.right:SetZOrder(-1);
 	self.right:SetMouseVisible(false);
-	self.right:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	self.right:SetBackground("CombatAnalysis/Resources/box_silver_side_right.tga");
+	self.right:SetBackColor(Theme.Colors.border);
+	self.right:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
 	
 	-- bottom side
 	self.bottom = Turbine.UI.Control();
@@ -114,15 +122,15 @@ function Window:Constructor(dialog)
 	self.bottom:SetSize(36,36);
 	self.bottom:SetZOrder(-1);
 	self.bottom:SetMouseVisible(false);
-	self.bottom:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	self.bottom:SetBackground("CombatAnalysis/Resources/box_silver_bottom.tga");
+	self.bottom:SetBackColor(Theme.Colors.border);
+	self.bottom:SetBackColorBlendMode(Turbine.UI.BlendMode.Overlay);
 	
 	-- center
 	self.center = Turbine.UI.Control();
 	self.center:SetParent(self);
 	self.center:SetZOrder(-1);
 	self.center:SetMouseVisible(false);
-	self.center:SetBackColor(Turbine.UI.Color(.925, 0, 0, 0));
+  Theme.ApplySurfaceBackground(self.center);
 	
 	-- title left
 	self.titleLeft = Turbine.UI.Control();
@@ -130,8 +138,7 @@ function Window:Constructor(dialog)
 	self.titleLeft:SetSize(35,42);
 	self.titleLeft:SetZOrder(1);
 	self.titleLeft:SetMouseVisible(false);
-	self.titleLeft:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	self.titleLeft:SetBackground("CombatAnalysis/Resources/base_box_titlebar_left.tga");
+  Theme.ApplyRaisedSurface(self.titleLeft);
   self.titleLeft:SetVisible(false);
 
 	-- title mid
@@ -140,8 +147,7 @@ function Window:Constructor(dialog)
 	self.titleMid:SetSize(20,42);
 	self.titleMid:SetZOrder(1);
 	self.titleMid:SetMouseVisible(false);
-	self.titleMid:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	self.titleMid:SetBackground("CombatAnalysis/Resources/base_box_titlebar_top.tga");
+  Theme.ApplyRaisedSurface(self.titleMid);
   self.titleMid:SetVisible(false);
 	
 	-- title right
@@ -150,35 +156,46 @@ function Window:Constructor(dialog)
 	self.titleRight:SetSize(35,42);
 	self.titleRight:SetZOrder(1);
 	self.titleRight:SetMouseVisible(false);
-	self.titleRight:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	self.titleRight:SetBackground("CombatAnalysis/Resources/base_box_titlebar_right.tga");
+  Theme.ApplyRaisedSurface(self.titleRight);
   self.titleRight:SetVisible(false);
 	
 	-- close button
-	self.close = Turbine.UI.Control();
+	self.close = Turbine.UI.Label();
 	self.close:SetParent(self);
 	self.close:SetSize(16,16);
 	self.close:SetZOrder(4);
-	self.close:SetBlendMode(Turbine.UI.BlendMode.AlphaBlend);
-	self.close:SetBackground("CombatAnalysis/Resources/titlebar_X_2.tga");
+	self.close:SetFont(Theme.Fonts.body);
+	self.close:SetFontStyle(Turbine.UI.FontStyle.None);
+	self.close:SetTextAlignment(Turbine.UI.ContentAlignment.MiddleCenter);
+	self.close:SetForeColor(Theme.Colors.textMuted);
+	self.close:SetBackColor(Turbine.UI.Color(0,0,0,0));
+	self.close:SetText("X");
 	self.close.pressed = false;
 	self.close.MouseEnter = function(sender, args)
-		self.close:SetBackground("CombatAnalysis/Resources/titlebar_X_2_"..(self.close.pressed and "pressed" or "mouseover")..".tga");
+		self.close:SetForeColor(Theme.Colors.accentHover);
+		self.close:SetBackColor(Theme.Colors.overlay);
 	end
 	self.close.MouseLeave = function(sender, args)
-		self.close:SetBackground("CombatAnalysis/Resources/titlebar_X_2"..(self.close.pressed and "_mouseover" or "")..".tga");
+		self.close.pressed = false;
+		self.close:SetForeColor(Theme.Colors.textMuted);
+		self.close:SetBackColor(Turbine.UI.Color(0,0,0,0));
 	end
 	self.close.MouseDown = function(sender, args)
+		if (args.Button ~= Turbine.UI.MouseButton.Left) then return end
 		WindowManager.MouseWasPressed(self);
 		self.close.pressed = true;
-		self.close:SetBackground("CombatAnalysis/Resources/titlebar_X_2_pressed.tga");
+		self.close:SetForeColor(Theme.Colors.accentActive);
 	end
 	self.close.MouseUp = function(sender, args)
+		if (self.close.pressed) then
+			self.close:SetForeColor(Theme.Colors.accentHover);
+		end
 		self.close.pressed = false;
-		self.close:SetBackground("CombatAnalysis/Resources/titlebar_X_2.tga");
 	end
 	self.close.MouseClick = function(sender, args)
-		self:Close();
+		if (args.Button == Turbine.UI.MouseButton.Left) then
+			self:Close();
+		end
 	end
 end
 
@@ -188,6 +205,7 @@ function Window:SetText(text)
   self.titleLeft:SetVisible(text ~= nil and text ~= "");
   self.titleMid:SetVisible(text ~= nil and text ~= "");
   self.titleRight:SetVisible(text ~= nil and text ~= "");
+	self.titleUnderline:SetVisible(text ~= nil and text ~= "");
 end
 
 function Window:GetParent()
@@ -233,22 +251,28 @@ end
 
 function Window:Layout()
 	local width, height = self:GetSize();
-	if (width < 142) then
-		width = 142;
+	if (width < 200) then
+		width = 200;
 	end
-	if (height < 102) then
-		height = 102;
+	if (height < 140) then
+		height = 140;
 	end
 	
-	local titleWidth = math.min(self.titleWidth, width - 72);
+	local titleWidth = math.min(self.titleWidth, width - 96);
 	local spacer = (width - titleWidth) / 2;
-	self.titleLeft:SetPosition(spacer, -7);
-	self.titleMid:SetPosition(spacer + 35, -7);
+	self.titleLeft:SetPosition(spacer, -4);
+	self.titleLeft:SetHeight(34);
+	self.titleMid:SetPosition(spacer + 35, -4);
 	self.titleMid:SetWidth(titleWidth - 70);
-	self.titleRight:SetPosition(width - spacer - 35, -7);
-	self.title:SetPosition(spacer + 25, 8);
-	self.title:SetWidth(titleWidth - 50);
-	
+	self.titleMid:SetHeight(34);
+	self.titleRight:SetPosition(width - spacer - 35, -4);
+	self.titleRight:SetHeight(34);
+	self.title:SetPosition(spacer + 18, 4);
+	self.title:SetWidth(titleWidth - 76);
+	self.title:SetHeight(26);
+	self.titleUnderline:SetPosition(self.title:GetLeft(), self.title:GetTop() + self.title:GetHeight() - 2);
+	self.titleUnderline:SetWidth(math.max(0,self.title:GetWidth()));
+
 	local offset = 20;
 	self.close:SetPosition(width - 23, offset + 6);
 	self.topLeft:SetPosition(0, offset);

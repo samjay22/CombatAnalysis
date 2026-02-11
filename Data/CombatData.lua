@@ -33,6 +33,11 @@ function CombatData:Initialize()
 	
 	self.combatElements = {}
 	
+	-- load lifetime skill recommendations from disk
+	if (skillRecommendations ~= nil) then
+		skillRecommendations:Load();
+	end
+	
 	-- create "Totals" encounter
 	local gameStartTime = Turbine.Engine.GetGameTime();
 	self.totalsEncounter = Encounter(true,Turbine.Engine.GetDate(),gameStartTime);
@@ -293,6 +298,13 @@ function CombatData:EncounterFinished(timestamp)
 	self.currentEncounter:DetermineName();
 	encountersComboBox:SetLastItemName(self.currentEncounter.longName);
 	fileSelectDialog:NotifyLastItemChanged(self.currentEncounter.longName);
+	
+	-- record skill data for recommendations (using the encounter's own mob/restore data)
+	if (skillRecommendations ~= nil) then
+		local encMob = self.currentEncounter.orderedMobs[1];
+		local encRestore = self.currentEncounter.orderedRestores[1];
+		skillRecommendations:RecordEncounter(encMob, encRestore);
+	end
 	
 	-- now that we are out of combat, update the chatsend buttons
 	dmgTab:UpdateChatSendButton();

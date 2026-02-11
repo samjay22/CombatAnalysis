@@ -435,6 +435,9 @@ L["Average"] = "Average";
 L["Maximum"] = "Maximum";
 L["Minimum"] = "Minimum";
 
+L["Recommendations"] = "Recommendations";
+L["RecNoData"] = "No data yet";
+
 --- Added in v4.4.7 to support Normal Hits
 L["NormalHits"] = "Normal Hits";
 L["NormalHitChance"] = "Hit Chance";
