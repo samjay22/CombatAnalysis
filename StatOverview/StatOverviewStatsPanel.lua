@@ -825,19 +825,28 @@ function StatOverviewStatsPanel:FullUpdate(duration,newSelection,forceNewSelecti
 	self.maxNode:UpdateData(Misc.FormatValue(dataSummary.max));
 	self.minNode:UpdateData(Misc.FormatValue(dataSummary.min));
 	
-	-- Update recommendations from lifetime data
-	local recCategory = skillRecommendations.tabCategoryMap[self.tab.saveKey];
-	if (recCategory ~= nil) then
-		local topSkills = skillRecommendations:GetTopSkills(recCategory);
-		for i = 1, skillRecommendations.maxRecommendations do
-			if (topSkills[i] ~= nil) then
-				local sk = topSkills[i];
-				self.recNodes[i].label:SetText(sk.name);
-				self.recNodes[i]:UpdateData(Misc.FormatValue(sk.avgPerHit), Misc.FormatPerc(sk.critRate,true));
-			else
-				self.recNodes[i].label:SetText(L.RecNoData);
-				self.recNodes[i]:ClearData();
-			end
+	-- Update recommendations: live per-skill DPS when viewing an
+	-- encounter, lifetime data when no encounter is selected.
+	self.recsNode.label:SetText(skillRecommendations:GetHeaderLabel());
+	
+	local topSkills;
+	if (self.duration ~= nil and self.duration > 0) then
+		local skillData = self.tab:GetDataForPlayer(self.selectedPlayer, true, self.category);
+		topSkills = skillRecommendations:GetLiveTopSkills(skillData, self.duration);
+	else
+		local recCategory = skillRecommendations.tabCategoryMap[self.tab.saveKey];
+		topSkills = (recCategory ~= nil) and skillRecommendations:GetTopSkills(recCategory) or {};
+	end
+	
+	for i = 1, skillRecommendations.maxRecommendations do
+		if (topSkills[i] ~= nil) then
+			local sk = topSkills[i];
+			self.recNodes[i].label:SetText(sk.name);
+			local mainValue = sk.dps and Misc.FormatPs(sk.dps) or Misc.FormatValue(sk.avgPerHit);
+			self.recNodes[i]:UpdateData(mainValue, Misc.FormatPerc(sk.critRate,true));
+		else
+			self.recNodes[i].label:SetText(L.RecNoData);
+			self.recNodes[i]:ClearData();
 		end
 	end
 	
@@ -909,6 +918,26 @@ function StatOverviewStatsPanel:Update(duration)
 	if (self.attacks ~= nil) then
 	  self.attackpsNode:UpdateData(Misc.FormatPs(self.attacks/(self.duration == 0 and 1 or self.duration)));  --- Added in v4.4.7 to support AttackPerSecond (APS)
   end
+
+	-- Live recommendation update (per-skill DPS from current encounter)
+	if (self.duration > 0) then
+		local skillData = self.tab:GetDataForPlayer(self.selectedPlayer, true, self.category);
+		if (skillData ~= nil) then
+			local topSkills = skillRecommendations:GetLiveTopSkills(skillData, self.duration);
+			self.recsNode.label:SetText(skillRecommendations:GetHeaderLabel());
+			for i = 1, skillRecommendations.maxRecommendations do
+				if (topSkills[i] ~= nil) then
+					local sk = topSkills[i];
+					self.recNodes[i].label:SetText(sk.name);
+					local mainValue = Misc.FormatPs(sk.dps);
+					self.recNodes[i]:UpdateData(mainValue, Misc.FormatPerc(sk.critRate,true));
+				else
+					self.recNodes[i].label:SetText(L.RecNoData);
+					self.recNodes[i]:ClearData();
+				end
+			end
+		end
+	end
 end
 
 -- stored empty data summary (used for quick updates of no data)

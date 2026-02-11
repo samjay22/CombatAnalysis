@@ -303,7 +303,7 @@ function CombatData:EncounterFinished(timestamp)
 	if (skillRecommendations ~= nil) then
 		local encMob = self.currentEncounter.orderedMobs[1];
 		local encRestore = self.currentEncounter.orderedRestores[1];
-		skillRecommendations:RecordEncounter(encMob, encRestore);
+		skillRecommendations:RecordEncounter(encMob, encRestore, encMob.duration);
 	end
 	
 	-- now that we are out of combat, update the chatsend buttons
